@@ -1,0 +1,39 @@
+version: '3.7'
+services:
+  code:
+    build: code
+    depends_on:
+      - redis
+      - db
+  nginx:
+    image: nginx
+    restart: always
+    volumes:
+      - $PWD/nginx/conf.d/:/etc/nginx/conf.d/
+      - $PWD/nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "80:80"
+      - "8887:8887"
+    depends_on:
+      - code
+  redis:
+    image: redis
+    restart: always
+    volumes: 
+      - $PWD/redis/conf:/conf
+      - $PWD/redis/data:/data
+    ports:
+      - "6379"
+    command:
+      redis-server /conf/redis.conf
+  db:
+    image: mysql/mysql-server:5.7
+    volumes:
+      - $PWD/db/mysql:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: test
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_HOST: '%'
+    restart: always
+    ports:
+      - "3307:3306"
